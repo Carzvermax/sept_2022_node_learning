@@ -1,2 +1,10 @@
-./node_modules
-./.idea
+# Editor directories and files
+.idea
+
+# Node artifact files
+node_modules/
+dist/
+
+# Environment variables
+.env
+.env.*
