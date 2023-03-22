@@ -40,7 +40,7 @@ router.post(
 );
 
 router.put(
-  "/password/forgot/:token",
+  `/password/forgot/:token`,
   authMiddleware.checkActionToken(EActionTokenType.forgot),
   authController.setForgotPassword
 );
@@ -53,7 +53,7 @@ router.post(
 );
 
 router.put(
-  "/activate/:token",
+  `/activate/:token`,
   authMiddleware.checkActionToken(EActionTokenType.activate),
   authController.activate
 );

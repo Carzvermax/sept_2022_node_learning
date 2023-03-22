@@ -1,4 +1,4 @@
-import * as path from "node:path";
+import path from "node:path";
 
 import EmailTemplates from "email-templates";
 import nodemailer, { Transporter } from "nodemailer";
@@ -41,20 +41,24 @@ class EmailService {
     emailAction: EEmailActions,
     locals: Record<string, string> = {}
   ) {
-    const templateInfo = allTemplates[emailAction];
-    locals.frontUrl = configs.FRONT_URL;
+    try {
+      const templateInfo = allTemplates[emailAction];
+      locals.frontUrl = configs.FRONT_URL;
 
-    const html = await this.templateParser.render(
-      templateInfo.templateName,
-      locals
-    );
+      const html = await this.templateParser.render(
+        templateInfo.templateName,
+        locals
+      );
 
-    return this.transporter.sendMail({
-      from: "No reply",
-      to: email,
-      subject: templateInfo.subject,
-      html,
-    });
+      return this.transporter.sendMail({
+        from: "No reply",
+        to: email,
+        subject: templateInfo.subject,
+        html,
+      });
+    } catch (e) {
+      console.error(e.message);
+    }
   }
 }
 

@@ -17,6 +17,7 @@ class CommonMiddleware {
       }
     };
   }
+
   public isBodyValid(validator: ObjectSchema) {
     return (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -34,4 +35,5 @@ class CommonMiddleware {
     };
   }
 }
+
 export const commonMiddleware = new CommonMiddleware();

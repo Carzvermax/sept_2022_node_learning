@@ -5,8 +5,8 @@ import { Action, Token, User } from "../models";
 import { ICredentials, ITokenPair, ITokenPayload, IUser } from "../types";
 import { emailService } from "./email.service";
 import { passwordService } from "./password.service";
-// import { smsService } from "./sms.service";
 import { tokenService } from "./token.service";
+
 class AuthService {
   public async register(body: IUser): Promise<void> {
     try {
@@ -37,7 +37,7 @@ class AuthService {
       );
 
       if (!isMatched) {
-        throw new ApiError("Invalid email or password", 400);
+        throw new ApiError("Invalid email or password", 409);
       }
 
       const tokenPair = tokenService.generateTokenPair({
@@ -55,7 +55,6 @@ class AuthService {
       throw new ApiError(e.message, e.status);
     }
   }
-
   public async refresh(
     tokenInfo: ITokenPair,
     jwtPayload: ITokenPayload
@@ -78,17 +77,27 @@ class AuthService {
   }
 
   public async changePassword(
-    user: IUser,
+    userId: string,
     oldPassword: string,
     newPassword: string
   ): Promise<void> {
-    const isMatched = await passwordService.compare(oldPassword, user.password);
-    if (!isMatched) {
-      throw new ApiError("Wrong old password", 400);
-    }
+    try {
+      const user = await User.findById(userId);
 
-    const hashedNewPassword = await passwordService.hash(newPassword);
-    await User.updateOne({ _id: user._id }, { password: hashedNewPassword });
+      const isMatched = await passwordService.compare(
+        oldPassword,
+        user.password
+      );
+
+      if (!isMatched) {
+        throw new ApiError("Wrong old password", 400);
+      }
+
+      const hashedNewPassword = await passwordService.hash(newPassword);
+      await User.updateOne({ _id: user._id }, { password: hashedNewPassword });
+    } catch (e) {
+      throw new ApiError(e.message, e.status);
+    }
   }
 
   public async forgotPassword(user: IUser): Promise<void> {
@@ -110,15 +119,21 @@ class AuthService {
       throw new ApiError(e.message, e.status);
     }
   }
+
   public async setForgotPassword(password: string, id: string): Promise<void> {
     try {
       const hashedPassword = await passwordService.hash(password);
 
       await User.updateOne({ _id: id }, { password: hashedPassword });
+      await Token.deleteMany({
+        _user_id: id,
+        tokenType: EActionTokenType.forgot,
+      });
     } catch (e) {
       throw new ApiError(e.message, e.status);
     }
   }
+
   public async sendActivateToken(user: IUser): Promise<void> {
     try {
       const actionToken = tokenService.generateActionToken(
@@ -138,15 +153,23 @@ class AuthService {
       throw new ApiError(e.message, e.status);
     }
   }
+
   public async activate(userId: string): Promise<void> {
     try {
-      await User.updateOne(
-        { _id: userId },
-        { $set: { status: EUserStatus.active } }
-      );
+      await Promise.all([
+        User.updateOne(
+          { _id: userId },
+          { $set: { status: EUserStatus.active } }
+        ),
+        Token.deleteMany({
+          _user_id: userId,
+          tokenType: EActionTokenType.activate,
+        }),
+      ]);
     } catch (e) {
       throw new ApiError(e.message, e.status);
     }
   }
 }
+
 export const authService = new AuthService();

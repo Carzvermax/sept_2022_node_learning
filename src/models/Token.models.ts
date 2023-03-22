@@ -9,7 +9,7 @@ const tokensSchema = new Schema(
       required: true,
       ref: User,
     },
-    actionToken: {
+    accessToken: {
       type: String,
       required: true,
     },
