@@ -20,7 +20,10 @@ class AuthMiddleware {
         throw new ApiError("No token", 401);
       }
 
-      const jwtPayload = tokenService.checkToken(accessToken);
+      const jwtPayload = tokenService.checkToken(
+        accessToken,
+        ETokenType.access
+      );
 
       const tokenInfo = await Token.findOne({ accessToken });
 

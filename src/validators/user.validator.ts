@@ -5,6 +5,7 @@ import { EGenders } from "../enums";
 
 export class UserValidator {
   private static firstName = Joi.string().min(2).max(50).trim();
+  private static age = Joi.string();
   private static email = Joi.string()
     .regex(regexConstants.EMAIL)
     .lowercase()
@@ -17,6 +18,7 @@ export class UserValidator {
     name: this.firstName.required(),
     email: this.email.required(),
     password: this.password.required(),
+    age: this.age.required(),
     gender: this.gender.required(),
     phone: this.phone.required(),
   });
