@@ -22,6 +22,10 @@ const userSchema = new Schema(
     age: {
       type: String,
     },
+    avatar: {
+      type: String,
+      required: false,
+    },
     gender: {
       type: String,
       enum: EGenders,

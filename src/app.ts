@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+import fileUploader from "express-fileupload";
 import mongoose from "mongoose";
 
 import { configs } from "./configs/config";
@@ -10,6 +11,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(fileUploader());
 
 app.use("/cars", carRouter);
 app.use("/users", userRouter);
